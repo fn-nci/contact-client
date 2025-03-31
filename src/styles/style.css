@@ -1,0 +1,367 @@
+/* styles/style.css */
+
+/* General Styles */
+body {
+  font-family: Arial, sans-serif; /* default font for the body */
+  background-color: #f0f0f0; /* light grey background color */
+  margin: 0; /* remove default margin */
+  padding: 0; /* remove default padding */
+}
+
+.container {
+  max-width: 1200px; /* limit width of container */
+  margin: 0 auto; /* centre container horizontally */
+  padding: 0 20px; /* add padding on sides for spacing */
+  width: 100%; /* make sure container spans full width of its parent */
+}
+
+/* responsive design for smaller screens */
+@media (max-width: 768px) {
+  .container {
+      padding: 0 16px; /* reduce padding for screen width of 768px or under */
+  }
+}
+  
+ /* Button Styles */
+.button {
+  padding: 10px 16px; /* add padding for better click area */
+  border-radius: 8px; /* round the corners of buttons, I don't like sharp edges */
+  border: none; /* remove default button border */
+  font-weight: 600; /* make text bold */
+  font-size: 14px; /* set text size */
+  cursor: pointer; /* change cursor to pointer on hover */
+  transition: all 0.2s ease; /* smooth transition for hover effects */
+  display: inline-flex; /* align children horizontally */
+  align-items: center; /* centre children vertically */
+  justify-content: center; /* centre children horizontally */
+  gap: 8px; /* add space between children (e.g., text and icon) */
+}
+
+.button:disabled {
+  opacity: 0.6; /* reduce visibility of disabled buttons, subtle but effective */
+  cursor: not-allowed; /* change cursor to indicate unclickable state */
+}
+
+/* Primary Button */
+.primary {
+  background-color: #4f46e5; /* royal blue background */
+  color: white; /* White text color */
+}
+  
+  .primary:hover:not(:disabled) { /* provided button isn't disabled, hover over effect of slightly darker blue */
+    background-color: #4338ca;
+  }
+  
+  .secondary {   /* secondary button with light grey background and dark grey text  */
+    background-color: #e5e7eb;
+    color: #111827;
+  }
+  
+  .secondary:hover:not(:disabled) { /* provided button isn't disabled, hover over effect of slightly darker grey */
+    background-color: #d1d5db;
+  }
+  
+  .danger {  /* red for danger!!! */
+    background-color: #ef4444;
+    color: white;
+  }
+  
+  .danger:hover:not(:disabled) { /* provided button isn't disabled, hover over effect of slightly darker red */
+    background-color: #dc2626;
+  }
+  
+  .success {  
+    background-color: #10b981;  /* green for go, right? Success!  */
+    color: white;
+  }
+  
+  .success:hover:not(:disabled) {  /* again, provided button isn't disabled, hover over effect of slightly darker green */
+    background-color: #059669;
+  }
+  
+ /* Card Styles */
+.card {
+  background-color: white; /* white card background */
+  border-radius: 12px; /* round the corners, no sharp corners, right? */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* add subtle shadow */
+  padding: 24px; /* add padding inside the card */
+  margin-bottom: 24px; /* add space below the card */
+  transition: all 0.3s ease; /* smooth transition for hover effects (I love a good hover effect!) */
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* increase shadow on hover */
+  transform: translateY(-2px); /* lift card slightly on hover */
+}
+
+/* Form Styles */
+.form {
+  display: flex; /* use flexbox layout */
+  flex-direction: column; /* stack items vertically */
+  gap: 16px; /* add spacing between form items */
+}
+
+.formGroup {
+  display: flex;  /* use flexbox layout */
+  flex-direction: column;  /* stack  vertically */
+  gap: 6px;  /* add spacing between each element vertically */
+  width: 100%; /* fill available space */
+}
+  
+  .formRow {
+    display: flex;  /* use flexbox layout */
+    gap: 16px;  /* gap between eleents so they don't overlap */
+    width: 100%; /* fill available horizontal space */
+  }
+  
+  @media (max-width: 768px) {
+    .formRow {
+      flex-direction: column;  /* stacks vertically on smaller screens */
+    }
+  }
+  
+  .label {
+    font-size: 14px; /* label text size */
+    font-weight: 500; /* make label text slightly bold */
+    color: #4b5563; /* dark gray color for labels */
+}
+
+.input {
+    padding: 10px 12px; /* add padding inside the input field */
+    border-radius: 6px; /* round the input field corners */
+    border: 1px solid #d1d5db; /* add a border around the input */
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease; /* smooth transition for focus states */
+}
+
+.input:focus {
+    outline: none;
+    border-color: #4f46e5; /* change border color on focus */
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); /* add a subtle focus glow effect */
+}
+
+.inputError {
+    border-color: #ef4444; /* set error border color to red */
+}
+  
+  .inputError:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);  /* add a subtle error focus glow effect */
+  }
+  
+  .errorText {
+    color: #ef4444;  /* well it's got to be red, right? */
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .formActions {   /* styling for containers holding action buttons  */
+    display: flex;
+    justify-content: flex-end;   /* align button to right edge of container */
+    margin-top: 8px;   /* add space between form field and button  */
+  } 
+  
+  /* Contact List Styles */
+  .contactListWrapper {    /* wrapper for the contact list section with margin at the top */
+    margin-top: 24px; 
+  }
+  
+  .title {  
+    font-size: 22px;
+    font-weight: 600;  /* font weight bold */
+    margin-bottom: 16px; /* add space below title */
+    color: #1f2937;  /* text colour */
+  }
+  
+  /* Contact list grid layout */
+.contactList {
+  display: grid; /*  grid layout */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* create responsive grid of 300px minimum column width */
+  gap: 20px; /* add space between grid items */
+}
+
+/* responsive design for small screens (max-width: 640px) */
+@media (max-width: 640px) {
+  /* change  grid layout to one column for small screens */
+  .contactList {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Contact card styling */
+.contactCard {
+  display: flex; /* use flexbox layout */
+  flex-direction: column; /* stack content vertically */
+  height: 100%; /* makes card stretch vertically */
+  transition: all 0.2s ease; /* add smooth transition for hover or interaction */
+  margin-bottom: 0; /* remove bottom margin */
+}
+
+/* Styling for info section inside contact card */
+.contactInfo {
+  flex: 1; /* make  contactInfo section flexible */
+  margin-bottom: 16px; /* add space below the contactInfo */
+}
+
+/* Styling for contact name */
+.contactName {
+  font-size: 18px; /* font size */
+  font-weight: 600; /* bold font */
+  margin: 0 0 8px 0; /* add space below the contact name */
+  color: #111827; /* text color */
+}
+
+/* Styling for contact email */
+.contactEmail {
+  font-size: 16px; /* font size */
+  color: #4f46e5; /* text color */
+  margin: 0 0 12px 0; /* add space below the email */
+  word-break: break-word; /* break words if necessary */
+}
+  
+/* Styling for phone numbers section */
+.phoneNumbers {
+  margin-bottom: 12px; /* add space below phone numbers section */
+}
+
+/* Styling for phone, address, and birthday details */
+.phone, .address, .birthday {
+  font-size: 14px; /* Sets the font size */
+  margin: 0 0 6px 0; /* Adds space below each detail */
+  color: #4b5563; /* Sets the text color */
+}
+
+/* Styling for labels (Phone, Address, Birthday) */
+.phoneLabel, .addressLabel, .birthdayLabel {
+  font-weight: 500; /* medium weight font */
+  color: #374151; /* label text color */
+  margin-right: 4px; /* add space to right of label */
+}
+
+/* Styling for the action buttons inside a contact card */
+.contactActions {
+  display: flex; /* use flexbox layout */
+  gap: 8px; /* add space between buttons */
+  margin-top: auto; /* push buttons to bottom of contact card */
+}
+
+/* Loading, Error, Empty States styling */
+.loading, .error, .empty {
+  display: flex; /* use flexbox layout */
+  flex-direction: column; /* stack items vertically */
+  align-items: center; /* centre content horizontally */
+  justify-content: center; /* centre content vertically */
+  padding: 32px; /* add padding inside container */
+  text-align: center; /* centre text */
+}
+
+/* Styling for loading spinner */
+.spinner {
+  width: 40px; /* spinner width */
+  height: 40px; /* spinner height */
+  border: 4px solid rgba(79, 70, 229, 0.2); /* subtle border color */
+  border-radius: 50%; /* make spinner circular */
+  border-top-color: #4f46e5; /* colour of top of spinner */
+  animation: spin 1s ease-in-out infinite; /* rotating animation, full rotation in 1 sec, slow at begin and end  */
+  margin-bottom: 16px; /* add space below the spinner */
+}
+
+/* Keyframes for the spinner rotation animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg); /* spin a full rotation */
+  }
+}
+
+/* Styling for error state text */
+.error {
+  color: #ef4444; /* error text color red */
+}
+
+/* Styling for empty state text */
+.empty {
+  color: #6b7280; /* Sets empty text color to grey */
+}
+
+/* Modal Styles */
+/* Overlay background behind the modal */
+.modalOverlay {
+  position: fixed; /* fix the overlay to cover the entire viewport */
+  top: 0; left: 0; right: 0; bottom: 0; /* make it cover the whole screen */
+  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent black background */
+  display: flex; /* flexbox to centre modal */
+  align-items: center; /* centre modal vertically */
+  justify-content: center; /* centre  modal horizontally */
+  z-index: 1000; /* make sure it appears on top of other content */
+  backdrop-filter: blur(2px); /* apply a slight blur to background */
+}
+
+/* Styling for modal window */
+.modal {
+  background-color: white; /* white background */
+  border-radius: 12px; /* rounded corners - of course */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* add shadow effect */
+  width: 90%; /* set width to 90% of the screen */
+  max-width: 600px; /* max width of 600px */
+  max-height: 90vh; /* max height of 90% of viewport */
+  overflow-y: auto; /* allow scrolling if content overflows */
+  display: flex; /* flexbox layout */
+  flex-direction: column; /* stack content vertically */
+}
+
+/* Styling for modal header */
+.modalHeader {
+  display: flex; /* flexbox layout */
+  justify-content: space-between; /* justify items with space between */
+  align-items: center; /* align items vertically */
+  padding: 16px 24px; /* add padding inside header */
+  border-bottom: 1px solid #e5e7eb; /* add bottom border */
+}
+
+/* Modal title styling */
+.modalTitle {
+  font-size: 20px; /* font size */
+  font-weight: 600; /* bold font */
+  color: #111827; /* text color */
+  margin: 0; /* remove margin */
+}
+
+/* Close button in modal */
+.closeButton {
+  background: none; /* no background */
+  border: none; /* no border */
+  font-size: 24px; /* font size */
+  cursor: pointer; /* change cursor on hover */
+  color: #6b7280; /* text color */
+  padding: 4px; /* add padding */
+  border-radius: 4px; /* round the corners */
+  line-height: 1; /* adjust line height */
+}
+
+/* Hover effect for close button - because hover effects are cool */
+.closeButton:hover {
+  color: #111827; /* change color on hover */
+  background-color: #f3f4f6; /* add background color on hover */
+}
+
+/* Modal content section */
+.modalContent {
+  padding: 24px; /* add padding inside content */
+  flex: 1; /* make it flexible */
+}
+
+/* Modal footer styling */
+.modalFooter {
+  padding: 16px 24px; /* add padding inside  footer */
+  border-top: 1px solid #e5e7eb; /* add top border */
+  display: flex; /* flexbox layout */
+  justify-content: flex-end; /* alight footer items to right */
+}
+
+/* Responsive modal design for small screens */
+@media (max-width: 640px) {
+  /* adjust modal width and height for smaller screens */
+  .modal {
+    width: 95%; /* 95% width */
+    max-height: 95vh; /* 95% height of viewport */
+  }
+}
