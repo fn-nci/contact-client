@@ -28,7 +28,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: update-npm
-          command: 'npm install -g npm@latest'
+          command: 'npm install -g npm@7' #another version of npm 
       - restore_cache:
           key: dependency-cache-{{ checksum "package-lock.json" }}
       - run: 
