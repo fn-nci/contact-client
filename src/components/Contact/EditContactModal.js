@@ -7,20 +7,23 @@ import '../../styles/style.css'; // importing css
 const EditContactModal = (props) => {
   const modalRef = useRef(); // creating a reference to the modal element to detect clicks outside of it
 
-  // useEffect to add event listeners when modal is mounted and clean up when unmounted
+//destructuring props object because eslint hates me
+const { onClose, onSave, contact } = props;
+
+// useEffect to add event listeners when modal is mounted and clean up when unmounted
   useEffect(() => {
     // to detect clicks outside modal and close it if detected
     const handleClickOutside = (event) => {
       // if modalRef exists and clicked element is not inside modal, trigger onClose function passed via props
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        props.onClose(); // close modal when there is a click outside  modal
+        onClose(); // close modal when there is a click outside  modal
       }
     };
     
     // to detect if 'Esc' key is pressed, closing modal if it has been pressed
     const handleEscapeKey = (event) => {
       if (event.key === 'Escape') { // 'Esc' key detected
-        props.onClose(); // close modal
+        onClose(); // close modal
       }
     };
     
@@ -37,11 +40,11 @@ const EditContactModal = (props) => {
       document.removeEventListener('keydown', handleEscapeKey); // remove keydown listener
       document.body.style.overflow = 'auto'; // re-enable scrolling
     };
-  }, [props.onClose]); // dependency array ensures effect runs when `props.onClose` changes.
+  }, [onClose]); // dependency array ensures effect runs when `props.onClose` changes.
 
   //to handle the form submission event.
   const handleSubmit = (updatedContact) => {
-    props.onSave(props.contact.id, updatedContact); // calls  onSave function provided via props with the contact ID and updated contact details
+    onSave(contact.id, updatedContact); // calls  onSave function with contact ID and updated contact details
   };
 
   
@@ -51,19 +54,19 @@ const EditContactModal = (props) => {
         
         <div className="modalHeader"> {/* header */}
           <h2 className="modalTitle">Edit Contact</h2> {/* title */}
-          <button className="closeButton" onClick={props.onClose}>×</button> {/* close button, calls onClose function */}
+          <button className="closeButton" onClick={onClose}>×</button> {/* close button, calls onClose function */}
         </div>
         
         <div className="modalContent"> {/* content section, containing contact form */}
           <ContactForm 
-            initialData={props.contact} // pre-fill the form fields w initial data
+            initialData={contact} // pre-fill the form fields w initial data
             onSubmit={handleSubmit} // submit updated contact data to parent component via handleSubmit function
             buttonText="Save Changes" // text for the submit button in the form
           />
         </div>
         
         <div className="modalFooter"> {/* footer section of the modal */}
-          <Button variant="secondary" onClick={props.onClose}>Cancel</Button> {/* cancel button to close the modal */}
+          <Button variant="secondary" onClick={onClose}>Cancel</Button> {/* cancel button to close the modal */}
         </div>
       </div>
     </div>
