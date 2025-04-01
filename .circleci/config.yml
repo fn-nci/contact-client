@@ -22,7 +22,7 @@ jobs:
   build: 
     working_directory: ~/contact-client
     docker:
-      - image: node:18-alpine
+      - image: cimg/node:18.20 # image with Docker and Node.js
     steps:
       - checkout
       - setup_remote_docker
