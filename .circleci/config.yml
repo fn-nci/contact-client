@@ -69,7 +69,7 @@ jobs:
   
   deploy:
     docker:
-      - image: node:18-alpine
+      - image: cimg/node:18.20 #shh included in the cimg/node:18.20
     steps:
       - run:
           name: deploy-application
