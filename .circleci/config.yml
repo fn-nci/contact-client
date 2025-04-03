@@ -73,7 +73,7 @@ jobs:
           command: docker start $CONTAINER_NAME
       - run: #integrating owasp zap with correct image name, versioned tag added 
           name: run-zap-scan-against-container
-          command: CONTAINER_IP=$(docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'); docker run -t zaproxy/zap-stable:2.16.1 zap-baseline.py -t https://$CONTAINER_IP:8443 -P 8443 || echo "ZAP found issues but build continues"
+          command: CONTAINER_IP=$(docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}') && echo "Container IP is:$CONTAINER_IP" && docker run -t zaproxy/zap-stable:2.16.1 zap-baseline.py -t https://$CONTAINER_IP:8443 -P 8443 || echo "ZAP found issues but build continues"
 
   
   deploy:
