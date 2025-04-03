@@ -66,11 +66,14 @@ jobs:
           name: build-docker-image-for-integration-environment
           command: docker create -p 8443:8443 --name $CONTAINER_NAME $IMAGE_NAME
       - run: 
-          name: copy-sever-cert-and-private-key-accross
+          name: copy-sever-cert-and-private-key-across
           command: docker cp ./privatekey.pem $CONTAINER_NAME:/privatekey.pem; docker cp ./server.crt $CONTAINER_NAME:/server.crt
       - run: 
           name: start-docker-container
           command: docker start $CONTAINER_NAME
+      - run: 
+          name: run-zap-scan-against-container
+          command: CONTAINER_IP=$(docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'); docker run -t owasp/zap2docker-stable zap-baseline.py -t https://$CONTAINER_IP:8443 -P 8443 || echo "ZAP found issues but build continues"
 
   
   deploy:
