@@ -60,18 +60,18 @@ jobs:
           name: Publish Docker Image
           command: docker push $IMAGE_NAME
       - run:
-          name: Prepare SSL certificates 
+          name: Prepare SSL certificates
           command: |
             # Decode base64 certificates to files
             echo "$SERVER_64" | base64 -d > server.crt
             echo "$PRIVATE_64" | base64 -d > privatekey.pem
-            
+
             # Verify certificate files exist and have content
             if [ ! -s privatekey.pem ] || [ ! -s server.crt ]; then
               echo "Error: Certificate files are empty or not created properly"
               exit 1
             fi
-            
+
             # Display file sizes for verification
             echo "Certificate file size: $(wc -c < server.crt) bytes"
             echo "Private key file size: $(wc -c < privatekey.pem) bytes"
@@ -91,10 +91,12 @@ jobs:
           command: |
             # Wait for container to be ready
             sleep 10
-            
+
             # Run ZAP scan against deployed instance
+            CONTAINER_IP=$(docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+            echo "Running ZAP scan against HTTPS server at $CONTAINER_IP:8443"
             docker run -t zaproxy/zap-stable:2.16.1 zap-baseline.py \
-              -t https://ec2-34-241-85-158.eu-west-1.compute.amazonaws.com:8443 \
+              -t https://CONTAINER_IP:8443 \
               -I \
               || echo "ZAP found issues but build continues"
           no_output_timeout: 30m
