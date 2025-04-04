@@ -60,6 +60,11 @@ jobs:
           name: Publish Docker Image
           command: docker push $IMAGE_NAME
       - run:
+          name: Debug Docker image
+          command: |
+            echo "Inspecting Docker image..."
+            docker image inspect $IMAGE_NAME:latest
+      - run:
           name: Prepare SSL certificates
           command: |
             echo "$SERVER" | sed 's/\\n/\n/g' > server.crt
@@ -69,28 +74,49 @@ jobs:
               echo "Error: Certificate files are empty or not created properly"
               exit 1
             fi
+            cat server.crt | head -5
+            echo "Certificate file size: $(wc -c < server.crt) bytes"
+            echo "Private key file size: $(wc -c < privatekey.pem) bytes"
       - run:
-          name: Create test container
-          command: docker create -p 8443:8443 --name $CONTAINER_NAME $IMAGE_NAME
+          name: Create test container with debug options
+          command: |
+            docker create \
+              --name $CONTAINER_NAME \
+              -p 8443:8443 \
+              -e NGINX_DEBUG=true \
+              $IMAGE_NAME:latest
       - run:
           name: Copy SSL certificates to container
           command: |
             docker cp ./privatekey.pem $CONTAINER_NAME:/privatekey.pem
             docker cp ./server.crt $CONTAINER_NAME:/server.crt
+            echo "Verifying certificate files in container..."
+            docker exec -i $CONTAINER_NAME ls -la / || echo "Can't check files - container not started yet"
       - run:
-          name: Start test container
-          command: docker start $CONTAINER_NAME
-      - run:
-          name: Wait for container to be ready
+          name: Start container with logging
           command: |
-            sleep 15
-            docker ps
-            echo "Testing container connectivity..."
-            docker exec $CONTAINER_NAME nginx -t || echo "Nginx config error"
+            echo "Starting container..."
+            docker start $CONTAINER_NAME
+            echo "Waiting 5 seconds..."
+            sleep 5
+            echo "Container status:"
+            docker ps -a | grep $CONTAINER_NAME
+      - run:
+          name: Check container logs for failure reason
+          command: |
+            echo "Container logs:"
+            docker logs $CONTAINER_NAME || echo "No logs available"
+            echo "Checking Nginx error logs (if any):"
+            docker exec -i $CONTAINER_NAME cat /var/log/nginx/error.log || echo "No Nginx error logs or container not running"
+      - run:
+          name: Try running Nginx manually in container
+          command: |
+            echo "Attempting to run Nginx manually to diagnose issues..."
+            docker exec -i $CONTAINER_NAME nginx -g "daemon off;" || echo "Failed to run Nginx manually"
       - run:
           name: Run simplified ZAP security scan
           command: |
-            # Use a direct URL instead of container IP (which might not be accessible)
+            # Use a direct URL instead of container IP
             docker run -t zaproxy/zap-stable:2.16.1 zap-baseline.py \
               -t https://ec2-34-241-85-158.eu-west-1.compute.amazonaws.com:8443 \
               -I \
