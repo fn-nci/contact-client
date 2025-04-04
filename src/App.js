@@ -7,7 +7,7 @@ import Container from './components/UI/Container';
 import styles from './App.module.css';
 
 function App() {
-  //Using the useContact hook, destructing functions and states to use them within the component
+  // Get contacts and contact-related functions from the custom hook
   const { 
     contacts, 
     loading, 
@@ -17,47 +17,47 @@ function App() {
     updateContact 
   } = useContacts();
   
-  const [editingContact, setEditingContact] = useState(null); // state tracking if the contact is edited
+  // State for tracking which contact is being edited
+  const [editingContact, setEditingContact] = useState(null);
 
-  //using event handler handleAddcontact that accepts contactData
+  // Handler for adding a new contact
   const handleAddContact = async (contactData) => {
     try {
-      await addContact(contactData); // call the addContact function from useContacts.js 
+      await addContact(contactData);
     } catch (error) {
       console.error("Error adding contact:", error);
     }
   };
 
-
-  ////using event handler handleDeleteContact that accepts contactId param
+  // Handler for deleting an existing contact
   const handleDeleteContact = async (contactId) => {
     if (window.confirm("Are you sure you want to delete this contact?")) {
       try {
-        await deleteContact(contactId); // call the deleteContact function from useContacts.js 
+        await deleteContact(contactId);
       } catch (error) {
         console.error("Error deleting contact:", error);
       }
     }
   };
 
-  // setting the contact to be edited 
+  // Set the contact to be edited
   const handleEditContact = (contact) => {
-    setEditingContact(contact); // contact shown in an edit form
+    setEditingContact(contact);
   };
 
-  //funtion to save the changes
+  // Handler for saving edited contact data
   const handleSaveEdit = async (contactId, updatedContactData) => {
     try {
-      await updateContact(contactId, updatedContactData); // calling the function
+      await updateContact(contactId, updatedContactData);
       setEditingContact(null);
     } catch (error) {
       console.error("Error updating contact:", error);
     }
   };
 
-  //close the edit modal
+  // Close the edit modal
   const handleCloseEditModal = () => {
-    setEditingContact(null); // resets the editing state
+    setEditingContact(null);
   };
 
   return (

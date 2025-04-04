@@ -20,18 +20,15 @@ const apiClient = axios.create({
 });
 
 // Add request interceptor to automatically add CSRF token to all requests
-apiClient.interceptors.request.use(
-  config => {
-    // Get CSRF token from cookie
-    const csrfToken = getCSRFToken();
-    // If token exists, add it to the headers
-    if (csrfToken) {
-      config.headers['CSRF-Token'] = csrfToken;
-    }
-    return config;
-  },
-  error => Promise.reject(error)
-);
+apiClient.interceptors.request.use(config => {
+  // Get CSRF token from cookie
+  const csrfToken = getCSRFToken();
+  // If token exists, add it to the headers
+  if (csrfToken) {
+    config.headers['CSRF-Token'] = csrfToken;
+  }
+  return config;
+});
 
 const api = {
   // Get all contacts
