@@ -15,9 +15,9 @@ then
   docker rm $CONTAINER_NAME
 fi
 
-# Write the private key and server certificate to files with proper formatting
-echo "$PRIVATE_KEY" | sed 's/\\n/\n/g' > privatekey.pem
-echo "$SERVER" | sed 's/\\n/\n/g' > server.crt
+# Decode base64 certificates to files
+echo "$SERVER_64" | base64 -d > server.crt
+echo "$PRIVATE_64" | base64 -d > privatekey.pem
 
 # Verify certificate files exist and have content
 if [ ! -s privatekey.pem ] || [ ! -s server.crt ]; then
@@ -36,6 +36,6 @@ docker cp ./server.crt $CONTAINER_NAME:/server.crt
 docker start $CONTAINER_NAME
 
 # Clean up local certificate files
-rm -f privatekey.pem server.crt
+rm -f server.crt privatekey.pem
 
 echo "Deployment completed successfully"

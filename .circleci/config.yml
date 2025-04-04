@@ -60,74 +60,50 @@ jobs:
           name: Publish Docker Image
           command: docker push $IMAGE_NAME
       - run:
-          name: Debug Docker image
+          name: Prepare SSL certificates 
           command: |
-            echo "Inspecting Docker image..."
-            docker image inspect $IMAGE_NAME:latest
-      - run:
-          name: Prepare SSL certificates
-          command: |
-            echo "$SERVER" | sed 's/\\n/\n/g' > server.crt
-            echo "$PRIVATE_KEY" | sed 's/\\n/\n/g' > privatekey.pem
+            # Decode base64 certificates to files
+            echo "$SERVER_64" | base64 -d > server.crt
+            echo "$PRIVATE_64" | base64 -d > privatekey.pem
+            
             # Verify certificate files exist and have content
             if [ ! -s privatekey.pem ] || [ ! -s server.crt ]; then
               echo "Error: Certificate files are empty or not created properly"
               exit 1
             fi
-            cat server.crt | head -5
+            
+            # Display file sizes for verification
             echo "Certificate file size: $(wc -c < server.crt) bytes"
             echo "Private key file size: $(wc -c < privatekey.pem) bytes"
       - run:
-          name: Create test container with debug options
-          command: |
-            docker create \
-              --name $CONTAINER_NAME \
-              -p 8443:8443 \
-              -e NGINX_DEBUG=true \
-              $IMAGE_NAME:latest
+          name: Create test container
+          command: docker create -p 8443:8443 --name $CONTAINER_NAME $IMAGE_NAME:latest
       - run:
           name: Copy SSL certificates to container
           command: |
             docker cp ./privatekey.pem $CONTAINER_NAME:/privatekey.pem
             docker cp ./server.crt $CONTAINER_NAME:/server.crt
-            echo "Verifying certificate files in container..."
-            docker exec -i $CONTAINER_NAME ls -la / || echo "Can't check files - container not started yet"
       - run:
-          name: Start container with logging
-          command: |
-            echo "Starting container..."
-            docker start $CONTAINER_NAME
-            echo "Waiting 5 seconds..."
-            sleep 5
-            echo "Container status:"
-            docker ps -a | grep $CONTAINER_NAME
+          name: Start container
+          command: docker start $CONTAINER_NAME
       - run:
-          name: Check container logs for failure reason
+          name: Run ZAP scan
           command: |
-            echo "Container logs:"
-            docker logs $CONTAINER_NAME || echo "No logs available"
-            echo "Checking Nginx error logs (if any):"
-            docker exec -i $CONTAINER_NAME cat /var/log/nginx/error.log || echo "No Nginx error logs or container not running"
-      - run:
-          name: Try running Nginx manually in container
-          command: |
-            echo "Attempting to run Nginx manually to diagnose issues..."
-            docker exec -i $CONTAINER_NAME nginx -g "daemon off;" || echo "Failed to run Nginx manually"
-      - run:
-          name: Run simplified ZAP security scan
-          command: |
-            # Use a direct URL instead of container IP
+            # Wait for container to be ready
+            sleep 10
+            
+            # Run ZAP scan against deployed instance
             docker run -t zaproxy/zap-stable:2.16.1 zap-baseline.py \
               -t https://ec2-34-241-85-158.eu-west-1.compute.amazonaws.com:8443 \
               -I \
               || echo "ZAP found issues but build continues"
           no_output_timeout: 30m
       - run:
-          name: Clean up test container
+          name: Clean up
           command: |
             docker stop $CONTAINER_NAME || true
             docker rm $CONTAINER_NAME || true
-            rm -f privatekey.pem server.crt
+            rm -f server.crt privatekey.pem
 
   deploy:
     docker:
@@ -135,4 +111,4 @@ jobs:
     steps:
       - run:
           name: deploy-application
-          command: ssh -p 5454 -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_PUBLIC_DNS "export SERVER=\"$SERVER\"; export IMAGE_NAME=\"$IMAGE_NAME\"; export PRIVATE_KEY=\"$PRIVATE_KEY\"; export CONTAINER_NAME=\"$CONTAINER_NAME\"; rm -rf ~/contact-client/;git clone https://github.com/fn-nci/contact-client.git; source contact-client/deploy.sh;"
+          command: ssh -p 5454 -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_PUBLIC_DNS "export SERVER_64=\"$SERVER_64\"; export IMAGE_NAME=\"$IMAGE_NAME\"; export PRIVATE_64=\"$PRIVATE_64\"; export CONTAINER_NAME=\"$CONTAINER_NAME\"; rm -rf ~/contact-client/;git clone https://github.com/fn-nci/contact-client.git; source contact-client/deploy.sh;"
