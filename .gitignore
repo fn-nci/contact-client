@@ -22,3 +22,12 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Local Docker development
+docker-compose.yml
+local-dev.sh
+/ssl/
+*.crt
+*.pem
+*.key
+*.csr
