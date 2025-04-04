@@ -117,4 +117,7 @@ export const testCSRF = async () => {
 // Export the function so it can be called from the browser console
 window.testCSRF = testCSRF;
 
-export default { testCSRF }; 
+// Create a named constant for the default export
+const csrfTesterUtils = { testCSRF };
+
+export default csrfTesterUtils; 
