@@ -1,8 +1,8 @@
 version: 2.1
 
-workflows: 
+workflows:
   version: 2
-  build: 
+  build:
     jobs:
       - build:
           filters:
@@ -17,9 +17,8 @@ workflows:
           requires:
             - build
 
-
 jobs:
-  build: 
+  build:
     working_directory: ~/contact-client
     docker:
       - image: cimg/node:18.20 # image with Docker and Node.js
@@ -28,13 +27,13 @@ jobs:
       - setup_remote_docker
       - run:
           name: update-npm
-          command: 'npm install -g npm@7' #another version of npm 
+          command: 'npm install -g npm@7' #another version of npm
       - restore_cache:
           key: dependency-cache-{{ checksum "package-lock.json" }}
       - run:
           name: Clean npm cache
           command: 'npm cache clean --force' #clearing npm cache
-      - run: 
+      - run:
           name: install-npm
           command: 'npm install'
       - run:
@@ -43,7 +42,7 @@ jobs:
       - run:
           name: snyk-test-non-blocking
           command: snyk test || echo "Vulnerabilities found, but continue with build job"
-      - run:    
+      - run:
           name: build-react-app
           command: npm run build
       - save_cache:
@@ -55,11 +54,11 @@ jobs:
           command: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - run:
           name: Build Docker Image
-          command: docker build -t $IMAGE_NAME:latest . 
+          command: docker build -t $IMAGE_NAME:latest .
       - run:
           name: Publish Docker Image
           command: docker push $IMAGE_NAME
-      - run: 
+      - run:
           name: Prepare SSL certificates
           command: |
             echo "$SERVER" | sed 's/\\n/\n/g' > server.crt
@@ -69,27 +68,27 @@ jobs:
               echo "Error: Certificate files are empty or not created properly"
               exit 1
             fi
-      - run: 
+      - run:
           name: Create test container
           command: docker create -p 8443:8443 --name $CONTAINER_NAME $IMAGE_NAME
-      - run: 
+      - run:
           name: Copy SSL certificates to container
           command: |
             docker cp ./privatekey.pem $CONTAINER_NAME:/privatekey.pem
             docker cp ./server.crt $CONTAINER_NAME:/server.crt
-      - run: 
+      - run:
           name: Start test container
           command: docker start $CONTAINER_NAME
-      - run: 
+      - run:
           name: Run ZAP security scan
           command: |
             # Wait for container to be fully running
             sleep 10
-            
+
             # Get container IP
             CONTAINER_IP=$(docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
             echo "Container IP is: $CONTAINER_IP"
-            
+
             # Run ZAP scan with appropriate flags
             docker run --network="host" -t zaproxy/zap-stable:2.16.1 zap-baseline.py \
               -t https://$CONTAINER_IP:8443 \
@@ -107,7 +106,6 @@ jobs:
             docker rm $CONTAINER_NAME || true
             rm -f privatekey.pem server.crt
 
-  
   deploy:
     docker:
       - image: cimg/node:18.20 #shh included in the cimg/node:18.20
@@ -115,5 +113,3 @@ jobs:
       - run:
           name: deploy-application
           command: ssh -p 5454 -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_PUBLIC_DNS "export SERVER=\"$SERVER\"; export IMAGE_NAME=\"$IMAGE_NAME\"; export PRIVATE_KEY=\"$PRIVATE_KEY\"; export CONTAINER_NAME=\"$CONTAINER_NAME\"; rm -rf ~/contact-client/;git clone https://github.com/fn-nci/contact-client.git; source contact-client/deploy.sh;"
-
- 
