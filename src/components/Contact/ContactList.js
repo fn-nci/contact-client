@@ -7,6 +7,23 @@ import { useEffect } from 'react';
 
 // component that displays a list of contacts.
 const ContactList = (props) => {
+  
+  // Move useEffect to the top of the component, before any conditional returns
+  useEffect(() => {
+    console.log('Current cookies:', document.cookie);
+    
+    // Log axios default headers
+    console.log('Axios default headers:', axios.defaults.headers);
+    
+    // Make a test request to check CSRF token
+    axios.get('https://34.241.85.158:8444/contacts', { withCredentials: true })
+      .then(response => {
+        console.log('CSRF token received in test request:', document.cookie);
+      })
+      .catch(error => {
+        console.error('Error in test request:', error);
+      });
+  }, []);
 
   // check if data is still loading, show a loading spinner if true.
   if (props.loading) {
@@ -41,22 +58,6 @@ const ContactList = (props) => {
       </Card>
     );
   }
-
-  useEffect(() => {
-    console.log('Current cookies:', document.cookie);
-    
-    // Log axios default headers
-    console.log('Axios default headers:', axios.defaults.headers);
-    
-    // Make a test request to check CSRF token
-    axios.get('https://34.241.85.158:8444/contacts', { withCredentials: true })
-      .then(response => {
-        console.log('CSRF token received in test request:', document.cookie);
-      })
-      .catch(error => {
-        console.error('Error in test request:', error);
-      });
-  }, []);
 
   // show the list of contacts if data is successfully loaded
   return (
