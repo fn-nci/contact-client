@@ -30,10 +30,12 @@ const api = {
     }
   },
   
-  // asyn function addContact accepting contactId as a parameter
+  // asyn function deleteContact accepting contactId as a parameter
   deleteContact: async (contactId) => {
     try {
-      const response = await axios.delete(`${API_BASE_URL}/contacts/${contactId}`);//http delete request passing the contactID parameter
+      const response = await axios.delete(`${API_BASE_URL}/contacts/${contactId}`, {
+        withCredentials: true // send cookies for CSRF token
+      });
       return response.data;
     } catch (error) {
       console.error("Error deleting contact:", error);
@@ -44,7 +46,9 @@ const api = {
   // asyn function updateContact accepting 2 parameters - contactId and contactData
   updateContact: async (contactId, contactData) => {
     try {
-      const response = await axios.put(`${API_BASE_URL}/contacts/${contactId}`, contactData); //http put request passing the contactID and contactData parameters
+      const response = await axios.put(`${API_BASE_URL}/contacts/${contactId}`, contactData, {
+        withCredentials: true // send cookies for CSRF token
+      });
       return response.data;
     } catch (error) {
       console.error("Error updating contact:", error);
