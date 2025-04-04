@@ -96,7 +96,7 @@ jobs:
             CONTAINER_IP=$(docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
             echo "Running ZAP scan against HTTPS server at $CONTAINER_IP:8443"
             docker run -t zaproxy/zap-stable:2.16.1 zap-baseline.py \
-              -t https://CONTAINER_IP:8443 \
+              -t https://$CONTAINER_IP:8443 \
               -I \
               || echo "ZAP found issues but build continues"
           no_output_timeout: 30m
