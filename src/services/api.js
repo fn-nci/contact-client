@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // declare & initialize var for the api
-const API_BASE_URL = '/api'; //changed 
+const API_BASE_URL = 'https://34.241.85.158:8444'; //changed 
 
 const api = {
   //async function getAllContacts to retrieve the contacts from the backend
