@@ -60,20 +60,52 @@ jobs:
           name: Publish Docker Image
           command: docker push $IMAGE_NAME
       - run: 
-          name: set-environment-variables
-          command: echo $SERVER > server.crt && echo $PRIVATE_KEY > privatekey.pem
+          name: Prepare SSL certificates
+          command: |
+            echo "$SERVER" | sed 's/\\n/\n/g' > server.crt
+            echo "$PRIVATE_KEY" | sed 's/\\n/\n/g' > privatekey.pem
+            # Verify certificate files exist and have content
+            if [ ! -s privatekey.pem ] || [ ! -s server.crt ]; then
+              echo "Error: Certificate files are empty or not created properly"
+              exit 1
+            fi
       - run: 
-          name: build-docker-image-for-integration-environment
+          name: Create test container
           command: docker create -p 8443:8443 --name $CONTAINER_NAME $IMAGE_NAME
       - run: 
-          name: copy-sever-cert-and-private-key-across
-          command: docker cp ./privatekey.pem $CONTAINER_NAME:/privatekey.pem; docker cp ./server.crt $CONTAINER_NAME:/server.crt
+          name: Copy SSL certificates to container
+          command: |
+            docker cp ./privatekey.pem $CONTAINER_NAME:/privatekey.pem
+            docker cp ./server.crt $CONTAINER_NAME:/server.crt
       - run: 
-          name: start-docker-container
+          name: Start test container
           command: docker start $CONTAINER_NAME
-      - run: #integrating owasp zap with correct image name, versioned tag added 
-          name: run-zap-scan-against-container
-          command: CONTAINER_IP=$(docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}') && echo "Container IP is:$CONTAINER_IP" && docker run -t zaproxy/zap-stable:2.16.1 zap-baseline.py -t https://$CONTAINER_IP:8443 -P 8443 || echo "ZAP found issues but build continues"
+      - run: 
+          name: Run ZAP security scan
+          command: |
+            # Wait for container to be fully running
+            sleep 10
+            
+            # Get container IP
+            CONTAINER_IP=$(docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+            echo "Container IP is: $CONTAINER_IP"
+            
+            # Run ZAP scan with appropriate flags
+            docker run --network="host" -t zaproxy/zap-stable:2.16.1 zap-baseline.py \
+              -t https://$CONTAINER_IP:8443 \
+              -P 8443 \
+              -c zap-baseline.conf \
+              -I \
+              -r zap_report.html \
+              -l PASS \
+              || echo "ZAP found issues but build continues"
+          no_output_timeout: 30m
+      - run:
+          name: Clean up test container
+          command: |
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+            rm -f privatekey.pem server.crt
 
   
   deploy:

@@ -14,15 +14,28 @@ if [ "$CONTAINER_EXISTS" ]
 then
   docker rm $CONTAINER_NAME
 fi
+
+# Write the private key and server certificate to files with proper formatting
+echo "$PRIVATE_KEY" | sed 's/\\n/\n/g' > privatekey.pem
+echo "$SERVER" | sed 's/\\n/\n/g' > server.crt
+
+# Verify certificate files exist and have content
+if [ ! -s privatekey.pem ] || [ ! -s server.crt ]; then
+  echo "Error: Certificate files are empty or not created properly"
+  exit 1
+fi
+
 # Create a container called $CONTAINER_NAME that is available on port 8443 from our docker image
 docker create -p 8443:8443 --name $CONTAINER_NAME $IMAGE_NAME
-# Write the private key to a file
-echo $PRIVATE_KEY > privatekey.pem
-# Write the server key to a file
-echo $SERVER > server.crt
-# Add the private key to the $CONTAINER_NAME docker container
+
+# Add the private key and server certificate to the container
 docker cp ./privatekey.pem $CONTAINER_NAME:/privatekey.pem
-# Add the server key to the $CONTAINER_NAME docker container
 docker cp ./server.crt $CONTAINER_NAME:/server.crt
-# start the $CONTAINER_NAME container
+
+# Start the container
 docker start $CONTAINER_NAME
+
+# Clean up local certificate files
+rm -f privatekey.pem server.crt
+
+echo "Deployment completed successfully"

@@ -19,13 +19,16 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy the build output from stage 1
-COPY --from=BUILD /app/build /usr/share/nginx/html
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy custom Nginx config (to be created)
+# Copy custom Nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
-EXPOSE 80
+# Create directory for SSL certificates
+RUN mkdir -p /etc/nginx/ssl
+
+# Expose port 8443 for HTTPS
+EXPOSE 8443
 
 # Command to run when the container starts
 CMD ["nginx", "-g", "daemon off;"] 
