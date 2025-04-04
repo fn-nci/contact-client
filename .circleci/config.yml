@@ -71,6 +71,12 @@ jobs:
       - run: 
           name: start-docker-container
           command: docker start $CONTAINER_NAME
+      - run: # trying to debug docker container// loging the container that I am inspecting // listing all conatiners
+          name: debug-docker-conatiner
+          command: |
+            echo "Container name is: $CONTAINER_NAME" 
+            docker ps-a
+            docker inspect $CONTAINER_NAME || echo "Container not found or inspect step failed"
       - run: #integrating owasp zap with correct image name, versioned tag added 
           name: run-zap-scan-against-container
           command: CONTAINER_IP=$(docker inspect $CONTAINER_NAME --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}') && echo "Container IP is:$CONTAINER_IP" && docker run -t zaproxy/zap-stable:2.16.1 zap-baseline.py -t https://$CONTAINER_IP:8443 -P 8443 || echo "ZAP found issues but build continues"
