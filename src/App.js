@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ContactForm from './components/Contact/ContactForm';
 import ContactList from './components/Contact/ContactList';
 import EditContactModal from './components/Contact/EditContactModal';
 import { useContacts } from './hooks/useContacts';
 import Container from './components/UI/Container';
 import styles from './App.module.css';
+import { testCSRF } from './utils/csrfTester';
 
 function App() {
   //Using the useContact hook, destructing functions and states to use them within the component
@@ -18,6 +19,12 @@ function App() {
   } = useContacts();
   
   const [editingContact, setEditingContact] = useState(null); // state tracking if the contact is edited
+
+  // Make the CSRF tester available in the browser console
+  useEffect(() => {
+    window.testCSRF = testCSRF;
+    console.log("CSRF tester available. Run window.testCSRF() in console to test CSRF token functionality.");
+  }, []);
 
   //using event handler handleAddcontact that accepts contactData
   const handleAddContact = async (contactData) => {

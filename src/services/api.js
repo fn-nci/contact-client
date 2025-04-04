@@ -3,42 +3,68 @@ import axios from 'axios';
 // declare & initialize var for the api
 const API_BASE_URL = 'https://34.241.85.158:8444'; //changed 
 
-// Function to get CSRF token from cookies
+// Function to get CSRF token from cookies, checking common csurf names
 const getCSRFToken = () => {
+  // First, check all cookies and log them for debugging
+  console.log("All cookies:", document.cookie);
+  
+  // Try to find the _csrf cookie which is commonly used by csurf middleware
   const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-    const [name, value] = cookie.trim().split('=');
-    acc[name] = value;
+    const parts = cookie.trim().split('=');
+    if (parts.length === 2) {
+      const name = parts[0];
+      const value = parts[1];
+      acc[name] = value;
+    }
     return acc;
   }, {});
   
-  return cookies['XSRF-TOKEN'] || cookies['_csrf'] || '';
+  // Log individual cookies for debugging
+  console.log("Parsed cookies:", cookies);
+  
+  // Check multiple possible CSRF token cookie names
+  const token = cookies['XSRF-TOKEN'] || cookies['_csrf'] || cookies['csrf-token'] || '';
+  console.log("Found CSRF token:", token);
+  
+  return token;
 };
 
+// Create an instance of axios with default settings
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  xsrfCookieName: '_csrf',
+  xsrfHeaderName: 'X-CSRF-Token'
+});
+
+// Add a request interceptor to handle CSRF tokens
+apiClient.interceptors.request.use(config => {
+  // Always get fresh token before each request
+  const token = getCSRFToken();
+  if (token) {
+    // Try multiple header formats that csurf might be looking for
+    config.headers['X-CSRF-Token'] = token;
+    config.headers['X-XSRF-TOKEN'] = token;
+    config.headers['csrf-token'] = token;
+  }
+  return config;
+});
+
 const api = {
-  //async function getAllContacts to retrieve the contacts from the backend
+  // Get contacts first to retrieve CSRF token cookie
   getAllContacts: async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/contacts`, { //http get request to the api
-          withCredentials: true // send cookies
-      });
-      return response.data; // if request is successful, the method will return the data from the response
-    } catch (error) { // catching errors
-      console.error("Error fetching contacts:", error); // logs the error message to the console
+      const response = await apiClient.get('/contacts');
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
       throw error;
     }
   },
   
-  // asyn function addContact accepting contactData as a parameter
   addContact: async (contactData) => {
     try {
-      const csrfToken = getCSRFToken();
-      const response = await axios.post(`${API_BASE_URL}/contacts`, contactData, { 
-        withCredentials: true,
-        headers: {
-          'X-CSRF-Token': csrfToken,
-          'X-XSRF-TOKEN': csrfToken
-        }
-      });
+      const response = await apiClient.post('/contacts', contactData);
       return response.data;
     } catch (error) {
       console.error("Error adding contact:", error);
@@ -46,17 +72,17 @@ const api = {
     }
   },
   
-  // asyn function deleteContact accepting contactId as a parameter
   deleteContact: async (contactId) => {
     try {
-      const csrfToken = getCSRFToken();
-      console.log('Using CSRF token for delete:', csrfToken);
+      console.log(`Deleting contact with ID: ${contactId}`);
+      const token = getCSRFToken();
+      console.log(`Using CSRF token for delete: ${token}`);
       
-      const response = await axios.delete(`${API_BASE_URL}/contacts/${contactId}`, {
-        withCredentials: true,
+      const response = await apiClient.delete(`/contacts/${contactId}`, {
         headers: {
-          'X-CSRF-Token': csrfToken,
-          'X-XSRF-TOKEN': csrfToken
+          'X-CSRF-Token': token,
+          'X-XSRF-TOKEN': token,
+          'csrf-token': token
         }
       });
       return response.data;
@@ -66,17 +92,17 @@ const api = {
     }
   },
   
-  // asyn function updateContact accepting 2 parameters - contactId and contactData
   updateContact: async (contactId, contactData) => {
     try {
-      const csrfToken = getCSRFToken();
-      console.log('Using CSRF token for update:', csrfToken);
+      console.log(`Updating contact with ID: ${contactId}`);
+      const token = getCSRFToken();
+      console.log(`Using CSRF token for update: ${token}`);
       
-      const response = await axios.put(`${API_BASE_URL}/contacts/${contactId}`, contactData, {
-        withCredentials: true,
+      const response = await apiClient.put(`/contacts/${contactId}`, contactData, {
         headers: {
-          'X-CSRF-Token': csrfToken,
-          'X-XSRF-TOKEN': csrfToken
+          'X-CSRF-Token': token,
+          'X-XSRF-TOKEN': token,
+          'csrf-token': token
         }
       });
       return response.data;

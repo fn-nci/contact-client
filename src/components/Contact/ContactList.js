@@ -8,21 +8,48 @@ import { useEffect } from 'react';
 // component that displays a list of contacts.
 const ContactList = (props) => {
   
-  // Move useEffect to the top of the component, before any conditional returns
+  // Debug CSRF token functionality
   useEffect(() => {
+    console.log('=== DEBUGGING CSRF TOKEN ISSUES ===');
     console.log('Current cookies:', document.cookie);
     
-    // Log axios default headers
-    console.log('Axios default headers:', axios.defaults.headers);
+    // Test direct request to backend to get fresh CSRF token
+    const testRequest = async () => {
+      try {
+        console.log('Making test request to get CSRF token...');
+        // First make a GET request to ensure we have the latest CSRF token
+        const response = await axios.get('https://34.241.85.158:8444/contacts', { 
+          withCredentials: true 
+        });
+        console.log('GET request successful, response:', response.status);
+        console.log('Cookies after GET:', document.cookie);
+        
+        // Parse cookies to find CSRF token
+        const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+          const parts = cookie.trim().split('=');
+          if (parts.length === 2) {
+            acc[parts[0]] = parts[1];
+          }
+          return acc;
+        }, {});
+        
+        console.log('Parsed cookies:', cookies);
+        const csrfToken = cookies['XSRF-TOKEN'] || cookies['_csrf'] || cookies['csrf-token'] || '';
+        console.log('Found CSRF token:', csrfToken);
+        
+        // Set up headers for PUT/DELETE requests
+        const headers = {
+          'X-CSRF-Token': csrfToken,
+          'X-XSRF-TOKEN': csrfToken,
+          'csrf-token': csrfToken
+        };
+        console.log('Will use these headers for future requests:', headers);
+      } catch (error) {
+        console.error('Error in CSRF test request:', error);
+      }
+    };
     
-    // Make a test request to check CSRF token
-    axios.get('https://34.241.85.158:8444/contacts', { withCredentials: true })
-      .then(response => {
-        console.log('CSRF token received in test request:', document.cookie);
-      })
-      .catch(error => {
-        console.error('Error in test request:', error);
-      });
+    testRequest();
   }, []);
 
   // check if data is still loading, show a loading spinner if true.
